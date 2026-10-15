@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Quote Clerk · client message in, priced quote out</title>
+  <meta name="description" content="Paste a client's WhatsApp message, get a priced quote from your own rate card. Runs an open-weight model (Gemma 2) entirely in your browser, so client details never leave your laptop." />
+  <meta name="theme-color" content="#23304a" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main>
+    <header class="noprint">
+      <h1>Quote Clerk <span aria-hidden="true">🧾</span></h1>
+      <p class="lede">Paste the client's message. Get a priced quote and a reply, from <em>your</em> rates. Nothing leaves this device.</p>
+    </header>
+
+    <details id="setup" class="card noprint">
+      <summary><b>Your rate card</b> <small id="setup-summary"></small></summary>
+      <label class="field">
+        <span>I'm a…</span>
+        <select id="preset"></select>
+      </label>
+      <label class="field">
+        <span>Business name <small>(signs your quotes)</small></span>
+        <input id="business" maxlength="60" placeholder="e.g. Adib Studio, Chennai" />
+      </label>
+      <table class="rates" aria-label="Rate card">
+        <thead><tr><th>Service</th><th>Per</th><th>₹</th><th></th></tr></thead>
+        <tbody id="rates"></tbody>
+      </table>
+      <button type="button" id="add-rate" class="ghost small">+ Add a service</button>
+      <div class="grid">
+        <label class="field"><span>Rush fee %</span><input id="rushPct" type="number" min="0" max="200" /></label>
+        <label class="field"><span>Rush if under (days)</span><input id="rushDays" type="number" min="1" max="60" /></label>
+        <label class="field"><span>Advance %</span><input id="advancePct" type="number" min="0" max="100" /></label>
+        <label class="field"><span>Valid for (days)</span><input id="validDays" type="number" min="1" max="90" /></label>
+      </div>
+      <label class="check"><input type="checkbox" id="gst" /> Add 18% GST <small>(only if you're GST-registered)</small></label>
+      <p class="muted small">Saved in this browser only. The AI never sees or sets your prices: it only maps the request onto these services, and the maths is plain code.</p>
+      <button type="button" id="reset-rates" class="ghost small">Reset to sample rates</button>
+    </details>
+
+    <form id="form" class="noprint" autocomplete="off">
+      <label class="field">
+        <span>Client's message</span>
+        <textarea id="message" rows="7" maxlength="2500" placeholder="Paste the WhatsApp message or email here…"></textarea>
+      </label>
+      <div class="row tight" id="examples"></div>
+      <button type="submit" class="primary" id="go">Make the quote</button>
+    </form>
+
+    <section id="ai" class="card subtle noprint" aria-live="polite">
+      <div id="ai-status">Checking whether this device can run the model…</div>
+      <div id="ai-actions" class="row" hidden>
+        <button type="button" id="load-gemma">Load Gemma 2 2B <small>(≈1.4 GB, once)</small></button>
+        <button type="button" id="load-lite" class="ghost">Lite: Qwen2.5 1.5B <small>(≈1 GB)</small></button>
+      </div>
+      <progress id="ai-progress" max="1" value="0" hidden></progress>
+    </section>
+
+    <section id="result" hidden aria-live="polite">
+      <div class="card" id="quote-card">
+        <p class="source noprint" id="source"></p>
+        <pre id="stream" class="noprint" hidden></pre>
+        <div id="quote">
+          <div class="quote-head">
+            <div>
+              <h2>Quote</h2>
+              <p class="muted" id="q-meta"></p>
+            </div>
+            <div class="right" id="q-from"></div>
+          </div>
+          <table class="lines">
+            <thead><tr><th>Item</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Amount</th><th class="noprint"></th></tr></thead>
+            <tbody id="lines"></tbody>
+            <tfoot id="totals"></tfoot>
+          </table>
+          <p class="warn noprint" id="dropped" hidden></p>
+          <div id="asks-wrap" hidden>
+            <h3>Before I confirm</h3>
+            <ol id="asks"></ol>
+          </div>
+          <p class="muted small" id="q-terms"></p>
+        </div>
+        <div class="row noprint">
+          <select id="add-line" aria-label="Add an item"></select>
+        </div>
+      </div>
+
+      <div class="card noprint">
+        <h3>Reply to send</h3>
+        <textarea id="reply" rows="12"></textarea>
+        <div class="row">
+          <button type="button" class="primary" id="copy">Copy reply</button>
+          <a class="button" id="whatsapp" target="_blank" rel="noopener">Open in WhatsApp</a>
+          <button type="button" class="ghost" id="print">Print / save PDF</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="noprint">
+      <p>Runs an open-weight model in your browser with <a href="https://github.com/mlc-ai/web-llm">WebLLM</a>. Client messages and your rates stay on this device. Works offline once loaded.</p>
+      <p><a href="https://github.com/ess-cor/quote-clerk">Source on GitHub</a> · MIT licence</p>
+    </footer>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
