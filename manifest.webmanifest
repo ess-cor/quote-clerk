@@ -1,0 +1,13 @@
+{
+  "name": "Quote Clerk",
+  "short_name": "Quote Clerk",
+  "description": "Client message in, priced quote out. On-device AI, your rates, works offline.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f4f0",
+  "theme_color": "#23304a",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
